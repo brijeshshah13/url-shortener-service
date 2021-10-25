@@ -1,19 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"github.com/brijeshshah13/url-shortener-service/models/dbs"
-	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 )
 
 func main() {
-	initDBConn(dbs.DBNames["main"])
+	if err := initDBConn(dbs.DBNames["main"]); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func initDBConn(dbName string) *mongo.Database {
-	conn, err := dbs.ConnectDB(dbName)
-	if err != nil {
-		panic(fmt.Sprintf("ERROR: db conn error: %v", err))
+func initDBConn(dbName string) error {
+	if err := dbs.ConnectDB(dbName); err != nil {
+		log.Println(err)
+		return err
 	}
-	return conn
+	return nil
 }

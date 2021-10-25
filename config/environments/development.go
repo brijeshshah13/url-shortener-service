@@ -2,10 +2,10 @@ package environments
 
 type DBConfig struct {
 	URI     string
-	Options optionsConfig
+	Options OptionsConfig
 }
 
-type optionsConfig struct {
+type OptionsConfig struct {
 	useUnifiedTopology bool
 	useNewUrlParser    bool
 	useCreateIndex     bool
@@ -18,7 +18,7 @@ var (
 	Mongo                 = map[string]DBConfig{
 		"main": {
 			URI: "mongodb://localhost/urlshortener",
-			Options: optionsConfig{
+			Options: OptionsConfig{
 				useUnifiedTopology: true,
 				useNewUrlParser:    true,
 				useCreateIndex:     true,

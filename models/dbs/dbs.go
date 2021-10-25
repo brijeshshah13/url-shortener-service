@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"context"
+	"fmt"
 	"github.com/brijeshshah13/url-shortener-service/config/environments"
 	"github.com/brijeshshah13/url-shortener-service/models/utils"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,13 +25,19 @@ var collectionRegistry = map[string]string{
 
 type dbRegistryConfig struct {
 	connected bool
-	dbConfig  environments.DBConfig
+	connection mongo.Client
+	uri string
+	opts environments.OptionsConfig
 }
 
 var dbRegistry = map[string]dbRegistryConfig{
 	DBNames["main"]: {
 		connected: false,
-		dbConfig:  environments.Mongo["main"],
+		connection: mongo.Client{
+
+		},
+		uri: environments.Mongo["main"].URI,
+		opts: environments.Mongo["main"].Options,
 	},
 }
 
@@ -41,17 +48,25 @@ func init() {
 	}
 }
 
-func ConnectDB(dbName string) (*mongo.Database, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(dbRegistry[dbName].dbConfig.URI))
-	if err != nil {
-		log.Fatal(err)
+func ConnectDB(dbName string) error {
+	if _, ok := allowedDBNames[dbName]; !ok {
+		return fmt.Errorf("invalid db name: %s", dbName)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
+	if db, ok := dbRegistry[dbName]; ok {
+		if db.connected {
+			log.Printf("db %s already connected", dbName)
+			return nil
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(db.uri))
+		if err != nil {
+			log.Printf("error connecting to db: %s", err)
+			return err
+		}
+		db.connected = true
+		db.connection = *client
+		return nil
 	}
-	// defer client.Disconnect(ctx)
-	conn := client.Database(dbName)
-	return conn, nil
+	return fmt.Errorf("db %s not found", dbName)
 }
