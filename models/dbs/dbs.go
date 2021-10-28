@@ -24,20 +24,18 @@ var collectionRegistry = map[string]string{
 }
 
 type dbRegistryConfig struct {
-	connected bool
+	connected  bool
 	connection mongo.Client
-	uri string
-	opts environments.OptionsConfig
+	uri        string
+	opts       environments.OptionsConfig
 }
 
 var dbRegistry = map[string]dbRegistryConfig{
 	DBNames["main"]: {
-		connected: false,
-		connection: mongo.Client{
-
-		},
-		uri: environments.Mongo["main"].URI,
-		opts: environments.Mongo["main"].Options,
+		connected:  false,
+		connection: mongo.Client{},
+		uri:        environments.Mongo["main"].URI,
+		opts:       environments.Mongo["main"].Options,
 	},
 }
 

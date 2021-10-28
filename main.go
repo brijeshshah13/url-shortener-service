@@ -15,7 +15,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/health-check", func (ctx *gin.Context) {
+	r.GET("/health-check", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "OK")
 	})
 
