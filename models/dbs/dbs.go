@@ -68,3 +68,23 @@ func ConnectDB(dbName string) error {
 	}
 	return fmt.Errorf("db %s not found", dbName)
 }
+
+func GetModel(collectionName string) (*mongo.Collection, error) {
+	dbName, ok := collectionRegistry[collectionName]
+	if !ok {
+		return nil, fmt.Errorf("collection %s not found", collectionName)
+	}
+	if _, ok := allowedDBNames[dbName]; !ok {
+		return nil, fmt.Errorf("invalid db name: %s", dbName)
+	}
+	if db, ok := dbRegistry[dbName]; ok {
+		if !db.connected {
+			err := ConnectDB(dbName)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return db.connection.Database(dbName).Collection(collectionName), nil
+	}
+	return nil, fmt.Errorf("db %s not found", dbName)
+}
